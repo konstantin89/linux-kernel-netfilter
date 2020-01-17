@@ -18,7 +18,7 @@ Commands:
     
     lsmod - list kernel modules
     
-     dmesg -w | grep net_filte - display printk logs for net_filter
+    dmesg -w | grep net_filte - display printk logs for net_filter
 
 
 Types of kernel network filter hooks
