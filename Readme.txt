@@ -4,9 +4,12 @@ Links
     Linux kernel network hooks
         https://medium.com/@GoldenOak/linux-kernel-communication-part-1-netfilter-hooks-15c07a5a5c4e
 
+    Linux NetFilter
+        https://people.cs.clemson.edu/~westall/853/notes/netfilter.pdf
+
     Using NFQUEUE and libnetfilter_queue
         https://www.andersoncalixto.com.br/2015/11/using-nfqueue-and-libnetfilter_queue/
-
+        
 Commands:
 
     sudo insmod net_filter - install kernel module
