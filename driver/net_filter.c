@@ -16,26 +16,31 @@ static unsigned int hfunc(
 {
     struct iphdr *iph;
     struct udphdr *udph;
+    struct tcphdr *tcph;
        
     if (!skb)
     {
         return NF_ACCEPT;
     }
-        
 
     iph = ip_hdr(skb);
     
-    if (iph->protocol == IPPROTO_UDP) 
+    if(iph->protocol == IPPROTO_TCP)
     {
+        tcph = tcp_hdr(skb);
+        
+        printk(KERN_INFO "net_filter: Handling TCP packet. dst_port=[%hu]", ntohs(tcph->dest));
+        
+        return NF_ACCEPT;
+    }
+    
+    else if(iph->protocol == IPPROTO_UDP)
+    {  
+        
         udph = udp_hdr(skb);
         
-        if (ntohs(udph->dest) == 53)
-        {
-            return NF_ACCEPT;
-        }
-    }
-    else if (iph->protocol == IPPROTO_TCP) 
-    {
+        printk(KERN_INFO "net_filter: Handling UDP packet. dst_port=[%hu]", ntohs(udph->dest));
+        
         return NF_ACCEPT;
     }
     

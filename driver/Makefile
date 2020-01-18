@@ -1,5 +1,3 @@
-
-
 obj-m += net_filter.o
 
 all:

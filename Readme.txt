@@ -4,21 +4,18 @@ Links
     Linux kernel network hooks
         https://medium.com/@GoldenOak/linux-kernel-communication-part-1-netfilter-hooks-15c07a5a5c4e
 
-    Linux NetFilter
-        https://people.cs.clemson.edu/~westall/853/notes/netfilter.pdf
-
     Using NFQUEUE and libnetfilter_queue
-        https://www.andersoncalixto.com.br/2015/11/using-nfqueue-and-libnetfilter_queue/
+        https://www.andersoncalixto.com.br/2015/11/using-nfqueue-and-libnetfilter_queue
         
 Commands:
 
-    sudo insmod net_filter - install kernel module
+    sudo insmod net_filter.ko - install kernel module
 
     sudo rmmod net_filter - remove kernel module
     
     lsmod - list kernel modules
     
-    dmesg -w | grep net_filte - display printk logs for net_filter
+    dmesg -w | grep net_filter - display printk logs for net_filter
 
 
 Types of kernel network filter hooks
