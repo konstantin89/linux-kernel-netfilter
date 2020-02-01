@@ -1,13 +1,37 @@
+Brief:
 
-Links
+    This repo contains minimal implementation for Linux network traffic filtering
+    in kernel space. It gives the abillity to register a hook that will be triggered
+    on each network packet.
+    
+    Please refer "Kernel version notes" chapter for kernel version related info.
 
-    Linux kernel network hooks
-        https://medium.com/@GoldenOak/linux-kernel-communication-part-1-netfilter-hooks-15c07a5a5c4e
 
-    Using NFQUEUE and libnetfilter_queue
-        https://www.andersoncalixto.com.br/2015/11/using-nfqueue-and-libnetfilter_queue
+Usage:
+
+    To build and instll the kernel module:
+
+        git clone https://github.com/konstantin89/linux-kernel-netfilter
+        cd linux-kernel-net-filter/driver
+        make
+        sudo insmod net_filter.ko
         
-Commands:
+    Once the module has been installed, you can view its logs:
+    
+        sudo dmesg -w | grep net_filter
+        
+    To uninstall the module:
+    
+        sudo rmmod net_filter
+
+
+Example output:
+
+    [15389.747540] net_filter: Handling UDP packet. dst_port=[51079]
+    [15390.032658] net_filter: Handling TCP packet. dst_port=[47470]  
+    
+
+Command reference:
 
     sudo insmod net_filter.ko - install kernel module
 
@@ -15,7 +39,7 @@ Commands:
     
     lsmod - list kernel modules
     
-    dmesg -w | grep net_filter - display printk logs for net_filter
+    sudo dmesg -w | grep net_filter - display printk logs for net_filter
 
 
 Types of kernel network filter hooks
@@ -54,8 +78,18 @@ Hook callback return values (linux/netfilter.h)
     3. NF_QUEUE - Queue for user space handling
 
 
-Kernel version note
-    Tested on [5.0.0-37-generic] kernel build.
+Kernel version notes
+    Tested on [5.0.0-37-generic] kernel build (Debian 10).
     To test kernel release version on a machine run "uname -r".
+
+
+Links
+
+    Linux kernel network hooks
+        https://medium.com/@GoldenOak/linux-kernel-communication-part-1-netfilter-hooks-15c07a5a5c4e
+
+    Using NFQUEUE and libnetfilter_queue
+        https://www.andersoncalixto.com.br/2015/11/using-nfqueue-and-libnetfilter_queue
+        
 
 
