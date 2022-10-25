@@ -6,8 +6,38 @@
 #include <linux/ip.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>
+#include <linux/types.h>
 
 static struct nf_hook_ops *nfho = NULL;
+
+static bool isHttpPacket(struct sk_buff *skb)
+{
+    struct tcphdr *tcph;
+    struct iphdr *iph;
+    int data_size;
+
+    if(NULL == skb) return false;
+ 
+    iph = ip_hdr(skb);
+    if(NULL == iph) return false;
+
+    data_size = ntohs(iph->tot_len) - sizeof(struct iphdr) - sizeof(struct tcphdr);
+    printk(KERN_INFO "net_filter: TCP data size is[%d]", data_size);
+
+    tcph = tcp_hdr(skb);
+    if(NULL == tcph) return false;
+
+    // TODO - parse the data here
+    // Data is located at iph + data_size
+
+    if(80 == ntohs(tcph->dest))
+    {
+        printk(KERN_INFO "net_filter: HTTP Port!");
+        return true;
+    }
+
+    return false;
+}
 
 static unsigned int hfunc(
     void *priv, 
@@ -28,19 +58,17 @@ static unsigned int hfunc(
     if(iph->protocol == IPPROTO_TCP)
     {
         tcph = tcp_hdr(skb);
-        
-        printk(KERN_INFO "net_filter: Handling TCP packet. dst_port=[%hu]", ntohs(tcph->dest));
-        
+        //printk(KERN_INFO "net_filter: Handling TCP packet. dst_port=[%hu]", ntohs(tcph->dest));
+
+        isHttpPacket(skb);
+    
         return NF_ACCEPT;
     }
     
     else if(iph->protocol == IPPROTO_UDP)
     {  
-        
         udph = udp_hdr(skb);
-        
-        printk(KERN_INFO "net_filter: Handling UDP packet. dst_port=[%hu]", ntohs(udph->dest));
-        
+        //printk(KERN_INFO "net_filter: Handling UDP packet. dst_port=[%hu]", ntohs(udph->dest));
         return NF_ACCEPT;
     }
     
@@ -53,7 +81,10 @@ static int __init LKM_init(void)
     
     /* Initialize netfilter hook */
     nfho->hook = (nf_hookfn*)hfunc;        /* hook function */
-    nfho->hooknum = NF_INET_PRE_ROUTING;   /* received packets */
+    //nfho->hooknum = NF_INET_PRE_ROUTING;   /* received packets */
+    nfho->hooknum = NF_INET_LOCAL_OUT;   /* sent packets */
+
+    
     nfho->pf = PF_INET;                    /* IPv4 */
     nfho->priority = NF_IP_PRI_FIRST;      /* max hook priority */
     
