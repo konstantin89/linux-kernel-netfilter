@@ -12,27 +12,43 @@ static struct nf_hook_ops *nfho = NULL;
 
 static bool isHttpPacket(struct sk_buff *skb)
 {
-    struct tcphdr *tcph;
-    struct iphdr *iph;
-    int data_size;
+    struct tcphdr *tcph = NULL;
+    struct iphdr *iph = NULL;
+    int tcp_payload_size = 0;
+    char *tcp_payload = NULL;
+    int i=0;
+    int ip_and_tcp_header_length = 0;
 
     if(NULL == skb) return false;
  
     iph = ip_hdr(skb);
     if(NULL == iph) return false;
 
-    data_size = ntohs(iph->tot_len) - sizeof(struct iphdr) - sizeof(struct tcphdr);
-    printk(KERN_INFO "net_filter: TCP data size is[%d]", data_size);
-
     tcph = tcp_hdr(skb);
     if(NULL == tcph) return false;
 
-    // TODO - parse the data here
-    // Data is located at iph + data_size
+    tcp_payload = (char *)((char*)tcph + (int)(tcph->doff * 4));
+
+    ip_and_tcp_header_length = (int)((char*)tcp_payload - (char*)iph);
+    tcp_payload_size = (int)(ntohs(iph->tot_len) - ip_and_tcp_header_length);
+
+    //printk(KERN_INFO "net_filter: TCP data size is[%d]", tcp_payload_size);
 
     if(80 == ntohs(tcph->dest))
     {
-        printk(KERN_INFO "net_filter: HTTP Port!");
+        if(tcp_payload_size >= 50)
+        {
+            for(i=0; i<32; i++)
+            {
+                // Debug printing TCP payload
+                printk(KERN_INFO "net_filter: [%c] \n", tcp_payload[i]);
+            }
+        }
+   }
+
+    if(80 == ntohs(tcph->dest))
+    {
+        printk(KERN_INFO "net_filter: HTTP Port! Data size [%d]\n", tcp_payload_size);
         return true;
     }
 
@@ -103,4 +119,4 @@ module_init(LKM_init);
 
 module_exit(LKM_exit);
 
-
+MODULE_LICENSE("GPL");
