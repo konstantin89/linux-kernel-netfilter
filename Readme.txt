@@ -24,11 +24,11 @@ Usage:
     
         sudo rmmod net_filter
 
-
-Example output:
-
-    [15389.747540] net_filter: Handling UDP packet. dst_port=[51079]
-    [15390.032658] net_filter: Handling TCP packet. dst_port=[47470]  
+Testing
+``` bash
+    # HTTP GET request
+    curl http://reqbin.com/echo -L
+```
     
 
 Command reference:

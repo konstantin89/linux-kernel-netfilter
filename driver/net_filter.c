@@ -57,7 +57,14 @@ static bool isHttpPacket(struct sk_buff *skb)
 
     if(tcp_payload_size < 4) return false;
 
+    // Response HTTP
     if (tcp_payload[0] != 'H' || tcp_payload[1] != 'T' || tcp_payload[2] != 'T' || tcp_payload[3] != 'P') 
+    {
+        return false;
+    }
+
+    // Outgoing GET request
+    if (tcp_payload[0] != 'G' || tcp_payload[1] != 'E' || tcp_payload[2] != 'T') 
     {
         return false;
     }
@@ -88,7 +95,9 @@ static unsigned int hfunc(
         tcph = tcp_hdr(skb);
         //printk(KERN_INFO "net_filter: Handling TCP packet. dst_port=[%hu]", ntohs(tcph->dest));
 
-        isHttpPacket(skb);
+        bool isHttp = isHttpPacket(skb);
+        // This will drop all HTTP packets
+        //if(isHttp) return NF_DROP;
     
         return NF_ACCEPT;
     }
@@ -100,7 +109,7 @@ static unsigned int hfunc(
         return NF_ACCEPT;
     }
     
-    return NF_DROP;
+    return NF_ACCEPT;
 }
 
 static int __init LKM_init(void)
@@ -109,8 +118,8 @@ static int __init LKM_init(void)
     
     /* Initialize netfilter hook */
     nfho->hook = (nf_hookfn*)hfunc;        /* hook function */
-    nfho->hooknum = NF_INET_PRE_ROUTING;   /* received packets */
-    //nfho->hooknum = NF_INET_LOCAL_OUT;   /* sent packets */
+    //nfho->hooknum = NF_INET_PRE_ROUTING;   /* received packets */
+    nfho->hooknum = NF_INET_LOCAL_OUT;   /* sent packets */
 
     
     nfho->pf = PF_INET;                    /* IPv4 */
