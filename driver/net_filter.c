@@ -10,14 +10,39 @@
 
 static struct nf_hook_ops *nfho = NULL;
 
+const unsigned char *get_ipv4_payload(const struct iphdr *ipHeader)
+{
+    int ipHeaderLenInBytes = 4 * ipHeader->ihl;
+    const unsigned char *transportHeader = (const unsigned char*)(((const char*)(ipHeader)) + ipHeaderLenInBytes);
+    return transportHeader;
+}
+
+const struct tcphdr *get_tcp_header_from_ipv4_header(const struct iphdr *ipHeader)
+{
+    const struct tcphdr *tcpHeader = (const struct tcphdr *)get_ipv4_payload(ipHeader);
+    return tcpHeader;
+}
+
+const unsigned char *get_tcp_payload(const struct tcphdr *tcp_header)
+{
+    const unsigned char *tcp_payload_start = (const unsigned char*)tcp_header + (4 * tcp_header->doff);
+    return tcp_payload_start;
+}
+
+int get_tcp_payload_size(const struct iphdr *ip_header)
+{
+    const struct tcphdr *tcph = get_tcp_header_from_ipv4_header(ip_header);
+    const unsigned char *tcp_payload_start = get_tcp_payload(tcph);
+    int payload_length = ntohs(ip_header->tot_len) - (tcp_payload_start - (const unsigned char*)ip_header);
+    return payload_length;
+}
+
 static bool isHttpPacket(struct sk_buff *skb)
 {
     struct tcphdr *tcph = NULL;
     struct iphdr *iph = NULL;
     int tcp_payload_size = 0;
     char *tcp_payload = NULL;
-    int i=0;
-    int ip_and_tcp_header_length = 0;
 
     if(NULL == skb) return false;
  
@@ -27,32 +52,19 @@ static bool isHttpPacket(struct sk_buff *skb)
     tcph = tcp_hdr(skb);
     if(NULL == tcph) return false;
 
-    tcp_payload = (char *)((char*)tcph + (int)(tcph->doff * 4));
+    tcp_payload = get_tcp_payload(tcph);
+    tcp_payload_size = get_tcp_payload_size(iph);
 
-    ip_and_tcp_header_length = (int)((char*)tcp_payload - (char*)iph);
-    tcp_payload_size = (int)(ntohs(iph->tot_len) - ip_and_tcp_header_length);
+    if(tcp_payload_size < 4) return false;
 
-    //printk(KERN_INFO "net_filter: TCP data size is[%d]", tcp_payload_size);
-
-    if(80 == ntohs(tcph->dest))
+    if (tcp_payload[0] != 'H' || tcp_payload[1] != 'T' || tcp_payload[2] != 'T' || tcp_payload[3] != 'P') 
     {
-        if(tcp_payload_size >= 50)
-        {
-            for(i=0; i<32; i++)
-            {
-                // Debug printing TCP payload
-                printk(KERN_INFO "net_filter: [%c] \n", tcp_payload[i]);
-            }
-        }
-   }
-
-    if(80 == ntohs(tcph->dest))
-    {
-        printk(KERN_INFO "net_filter: HTTP Port! Data size [%d]\n", tcp_payload_size);
-        return true;
+        return false;
     }
 
-    return false;
+    printk(KERN_INFO "net_filter: Got HTTP packet! TCP payload size is[%d]", tcp_payload_size);
+
+    return true;
 }
 
 static unsigned int hfunc(
@@ -97,8 +109,8 @@ static int __init LKM_init(void)
     
     /* Initialize netfilter hook */
     nfho->hook = (nf_hookfn*)hfunc;        /* hook function */
-    //nfho->hooknum = NF_INET_PRE_ROUTING;   /* received packets */
-    nfho->hooknum = NF_INET_LOCAL_OUT;   /* sent packets */
+    nfho->hooknum = NF_INET_PRE_ROUTING;   /* received packets */
+    //nfho->hooknum = NF_INET_LOCAL_OUT;   /* sent packets */
 
     
     nfho->pf = PF_INET;                    /* IPv4 */
