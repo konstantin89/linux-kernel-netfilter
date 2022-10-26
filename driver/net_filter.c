@@ -58,17 +58,20 @@ static bool isHttpPacket(struct sk_buff *skb)
     if(tcp_payload_size < 4) return false;
 
     // Response HTTP
-    if (tcp_payload[0] != 'H' || tcp_payload[1] != 'T' || tcp_payload[2] != 'T' || tcp_payload[3] != 'P') 
+    if (tcp_payload[0] == 'H' && tcp_payload[1] == 'T' && tcp_payload[2] == 'T' && tcp_payload[3] == 'P') 
     {
-        return false;
+        goto is_http;
     }
 
     // Outgoing GET request
-    if (tcp_payload[0] != 'G' || tcp_payload[1] != 'E' || tcp_payload[2] != 'T') 
+    if (tcp_payload[0] == 'G' && tcp_payload[1] == 'E' && tcp_payload[2] == 'T') 
     {
-        return false;
+        goto is_http;
     }
 
+    return false;
+
+is_http:
     printk(KERN_INFO "net_filter: Got HTTP packet! TCP payload size is[%d]", tcp_payload_size);
 
     return true;
@@ -97,7 +100,7 @@ static unsigned int hfunc(
 
         bool isHttp = isHttpPacket(skb);
         // This will drop all HTTP packets
-        //if(isHttp) return NF_DROP;
+        if(isHttp) return NF_DROP;
     
         return NF_ACCEPT;
     }
