@@ -63,8 +63,23 @@ static bool isHttpPacket(struct sk_buff *skb)
         goto is_http;
     }
 
-    // Outgoing GET request
     if (tcp_payload[0] == 'G' && tcp_payload[1] == 'E' && tcp_payload[2] == 'T') 
+    {
+        goto is_http;
+    }
+
+    if (tcp_payload[0] == 'P' && tcp_payload[1] == 'O' && tcp_payload[2] == 'S' && tcp_payload[3] == 'T') 
+    {
+        goto is_http;
+    }
+
+
+    if (tcp_payload[0] == 'H' && tcp_payload[1] == 'E' && tcp_payload[2] == 'A' && tcp_payload[3] == 'D') 
+    {
+        goto is_http;
+    }
+
+    if (tcp_payload[0] == 'P' && tcp_payload[1] == 'U' && tcp_payload[2] == 'T') 
     {
         goto is_http;
     }
