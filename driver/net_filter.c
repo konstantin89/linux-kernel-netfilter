@@ -60,27 +60,32 @@ static bool isHttpPacket(struct sk_buff *skb)
     // Response HTTP
     if (tcp_payload[0] == 'H' && tcp_payload[1] == 'T' && tcp_payload[2] == 'T' && tcp_payload[3] == 'P') 
     {
+        printk(KERN_INFO "net_filter: TCP laypload starts with HTTP");
         goto is_http;
     }
 
     if (tcp_payload[0] == 'G' && tcp_payload[1] == 'E' && tcp_payload[2] == 'T') 
     {
+        printk(KERN_INFO "net_filter: TCP laypload starts with GET");
         goto is_http;
     }
 
     if (tcp_payload[0] == 'P' && tcp_payload[1] == 'O' && tcp_payload[2] == 'S' && tcp_payload[3] == 'T') 
     {
+        printk(KERN_INFO "net_filter: TCP laypload starts with POST");
         goto is_http;
     }
 
 
     if (tcp_payload[0] == 'H' && tcp_payload[1] == 'E' && tcp_payload[2] == 'A' && tcp_payload[3] == 'D') 
     {
+        printk(KERN_INFO "net_filter: TCP laypload starts with HEAD");
         goto is_http;
     }
 
     if (tcp_payload[0] == 'P' && tcp_payload[1] == 'U' && tcp_payload[2] == 'T') 
     {
+        printk(KERN_INFO "net_filter: TCP laypload starts with PUT");
         goto is_http;
     }
 
