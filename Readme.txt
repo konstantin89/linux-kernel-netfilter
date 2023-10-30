@@ -55,7 +55,7 @@ Types of kernel network filter hooks
                                    v            |
                                    
                      
-    1.NF_IP_PER_ROUNTING
+    1.NF_IP_PRE_ROUNTING
         This hook is called when a packet arrives into the machine.
             
     2.NF_IP_LOCAL_IN 
